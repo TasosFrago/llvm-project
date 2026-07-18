@@ -35,6 +35,7 @@ include "RISCVSchedule.td"
 include "RISCVCallingConv.td"
 include "RISCVInstrInfo.td"
 include "GISel/RISCVRegisterBanks.td"
+include "RISCVInstrInfoXZkp.td"
 
 //===----------------------------------------------------------------------===//
 // Instruction predicates

@@ -1038,3 +1038,48 @@ def MR0 : RISCVRegisterClass<[i8, v8i1], 8, (add M0)>;
 def GeneralPurposeRegisters : RegisterCategory<[GPR, GPRF16, GPRF32]>;
 
 def FixedRegisters : RegisterCategory<[GPRX0, GPRF16X0, GPRF32X0]>;
+
+
+class ZKPReg<bits<5> Enc, string n> : RISCVReg<Enc, n>;
+
+let isConstant = true in
+def B0  : ZKPReg<0, "b0">;
+
+def B1  : ZKPReg<1, "b1">;
+def B2  : ZKPReg<2, "b2">;
+def B3  : ZKPReg<3, "b3">;
+def B4  : ZKPReg<4, "b4">;
+def B5  : ZKPReg<5, "b5">;
+def B6  : ZKPReg<6, "b6">;
+def B7  : ZKPReg<7, "b7">;
+def B8  : ZKPReg<8, "b8">;
+def B9  : ZKPReg<9, "b9">;
+def B10 : ZKPReg<10, "b10">;
+def B11 : ZKPReg<11, "b11">;
+def B12 : ZKPReg<12, "b12">;
+def B13 : ZKPReg<13, "b13">;
+def B14 : ZKPReg<14, "b14">;
+def B15 : ZKPReg<15, "b15">;
+def B16 : ZKPReg<16, "b16">;
+def B17 : ZKPReg<17, "b17">;
+def B18 : ZKPReg<18, "b18">;
+def B19 : ZKPReg<19, "b19">;
+def B20 : ZKPReg<20, "b20">;
+def B21 : ZKPReg<21, "b21">;
+def B22 : ZKPReg<22, "b22">;
+def B23 : ZKPReg<23, "b23">;
+def B24 : ZKPReg<24, "b24">;
+def B25 : ZKPReg<25, "b25">;
+def B26 : ZKPReg<26, "b26">;
+def B27 : ZKPReg<27, "b27">;
+def B28 : ZKPReg<28, "b28">;
+def B29 : ZKPReg<29, "b29">;
+def B30 : ZKPReg<30, "b30">;
+def B31 : ZKPReg<31, "b31">;
+
+def BRegs : RegisterClass<"RISCV", [v8i32], 256, (add
+    B0, B1, B2, B3, B4, B5, B6, B7, B8, B9,
+    B10, B11, B12, B13, B14, B15, B16, B17, B18, B19,
+    B20, B21, B22, B23, B24, B25, B26, B27, B28, B29,
+    B30, B31
+)>;

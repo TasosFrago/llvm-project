@@ -23,6 +23,7 @@
 #include "llvm/CodeGen/TargetInstrInfo.h"
 #include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/Support/ErrorHandling.h"
+#include "llvm/MC/MCRegister.h"
 
 #define GET_REGINFO_TARGET_DESC
 #include "RISCVGenRegisterInfo.inc"
@@ -999,6 +1000,58 @@ bool RISCVRegisterInfo::getRegAllocationHints(
 
   if (!VRM || DisableRegAllocHints)
     return BaseImplRetVal;
+
+  // ==========================================
+  // XZkp: 4-Bank Register Conflict Avoidance
+  // ==========================================
+  const TargetRegisterClass *RC = MRI->getRegClass(VirtReg);
+  if (RC == &RISCV::BRegsRegClass) {
+    bool BadBank[4] = {false, false, false, false};
+    bool FoundConflict = false;
+
+    for (MachineInstr &UseMI : MRI->reg_nodbg_instructions(VirtReg)) {
+      unsigned Opc = UseMI.getOpcode();
+
+      if (Opc == RISCV::BMODADD || Opc == RISCV::BMODMUL ||
+          Opc == RISCV::BADD    || Opc == RISCV::BMODSUB ||
+          Opc == RISCV::BSUB    || Opc == RISCV::BAND ||
+          Opc == RISCV::BOR     || Opc == RISCV::BXOR ||
+          Opc == RISCV::BSLL    || Opc == RISCV::BSRL ||
+          Opc == RISCV::BSLTU   || Opc == RISCV::BSEQ) {
+
+        int OtherOpIdx = -1;
+        if (UseMI.getOperand(1).isReg() && UseMI.getOperand(1).getReg() == VirtReg)
+          OtherOpIdx = 2;
+        else if (UseMI.getOperand(2).isReg() && UseMI.getOperand(2).getReg() == VirtReg)
+          OtherOpIdx = 1;
+
+        if (OtherOpIdx != -1) {
+          Register OtherReg = UseMI.getOperand(OtherOpIdx).getReg();
+          MCRegister OtherPhysReg;
+
+          if (OtherReg.isPhysical())
+            OtherPhysReg = OtherReg.asMCReg();
+          else if (VRM && VRM->hasPhys(OtherReg))
+            OtherPhysReg = VRM->getPhys(OtherReg);
+
+          if (OtherPhysReg) {
+            unsigned Bank = getEncodingValue(OtherPhysReg) % 4;
+            BadBank[Bank] = true;
+            FoundConflict = true;
+          }
+        }
+      }
+    }
+
+    if (FoundConflict) {
+      for (MCPhysReg PhysReg : Order) {
+        unsigned Bank = getEncodingValue(PhysReg) % 4;
+        if (!BadBank[Bank]) {
+          Hints.push_back(PhysReg);
+        }
+      }
+    }
+  }
 
   // Add any two address hints after any copy hints.
   SmallSet<Register, 4> TwoAddrHints;

@@ -2195,3 +2195,9 @@ def TuneSiFive7 : SubtargetFeature<"sifive7", "RISCVProcFamily", "SiFive7",
 def TuneVentanaVeyron : SubtargetFeature<"ventana-veyron", "RISCVProcFamily", "VentanaVeyron",
                                          "Ventana Veyron-Series processors",
                                          [], InlineIgnore>;
+
+def FeatureVendorXZkp : RISCVExtension<1, 0, "Custom 256-bit ZKP Extension">;
+
+def HasExtXZkp : Predicate<"Subtarget->hasVendorXZkp()">,
+                           AssemblerPredicate<(all_of FeatureVendorXZkp),
+                           "'Xzkp' (Custom ZKP Extension)">;

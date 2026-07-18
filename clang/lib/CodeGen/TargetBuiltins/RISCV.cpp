@@ -1614,6 +1614,65 @@ Value *CodeGenFunction::EmitRISCVBuiltinExpr(unsigned BuiltinID,
   case RISCV::BI__builtin_riscv_nds_fcvt_bf16_s:
     return Builder.CreateFPTrunc(Ops[0], BFloatTy);
 
+  // XZkp Extension
+  case RISCV::BI__builtin_riscv_zkp_bmadd:
+    ID = Intrinsic::riscv_bmadd;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_bmmul:
+    ID = Intrinsic::riscv_bmmul;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_badd:
+    ID = Intrinsic::riscv_badd;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_bmsub:
+    ID = Intrinsic::riscv_bmsub;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_bsub:
+    ID = Intrinsic::riscv_bsub;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_band:
+    ID = Intrinsic::riscv_band;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_bor:
+    ID = Intrinsic::riscv_bor;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_bxor:
+    ID = Intrinsic::riscv_bxor;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_bsll:
+    ID = Intrinsic::riscv_bsll;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_bsrl:
+    ID = Intrinsic::riscv_bsrl;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_bmv:
+    ID = Intrinsic::riscv_bmv;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_bsltu:
+    ID = Intrinsic::riscv_bsltu;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_bseq:
+    ID = Intrinsic::riscv_bseq;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_bshfl:
+    ID = Intrinsic::riscv_bshfl;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_bshfli:
+    ID = Intrinsic::riscv_bshfli;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_bslli:
+    ID = Intrinsic::riscv_bslli;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_bsrli:
+    ID = Intrinsic::riscv_bsrli;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_lbn:
+    ID = Intrinsic::riscv_lbn;
+    break;
+  case RISCV::BI__builtin_riscv_zkp_sbn:
+    ID = Intrinsic::riscv_sbn;
+    break;
+
     // Vector builtins are handled from here.
 #include "clang/Basic/riscv_vector_builtin_cg.inc"
 

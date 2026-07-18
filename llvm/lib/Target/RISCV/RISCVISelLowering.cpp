@@ -339,6 +339,10 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     }
   }
 
+  if (Subtarget.hasVendorXZkp()) {
+    addRegisterClass(MVT::v8i32, &RISCV::BRegsRegClass);
+  }
+
   // Compute derived properties from the register classes.
   computeRegisterProperties(STI.getRegisterInfo());
 

@@ -2135,6 +2135,46 @@ let TargetPrefix = "riscv" in {
 
 // Vendor extensions
 //===----------------------------------------------------------------------===//
+
+//===----------------------------------------------------------------------===//
+// XZkp BigNumber Intrinsics
+
+let TargetPrefix = "riscv" in {
+  class ZKPRTypeInstr : DefaultAttrsIntrinsic<[llvm_v8i32_ty],
+                                    [llvm_v8i32_ty, llvm_v8i32_ty], [IntrNoMem]>;
+
+  def int_riscv_bmadd : ZKPRTypeInstr;
+  def int_riscv_bmmul : ZKPRTypeInstr;
+  def int_riscv_badd  : ZKPRTypeInstr;
+  def int_riscv_bmsub : ZKPRTypeInstr;
+  def int_riscv_bsub  : ZKPRTypeInstr;
+  def int_riscv_band  : ZKPRTypeInstr;
+  def int_riscv_bor   : ZKPRTypeInstr;
+  def int_riscv_bxor  : ZKPRTypeInstr;
+  def int_riscv_bsll  : ZKPRTypeInstr;
+  def int_riscv_bsrl  : ZKPRTypeInstr;
+
+  def int_riscv_bmv   : DefaultAttrsIntrinsic<[llvm_v8i32_ty], [llvm_v8i32_ty], [IntrNoMem]>;
+
+  def int_riscv_bshfl : DefaultAttrsIntrinsic<[llvm_v8i32_ty], [llvm_v8i32_ty, llvm_i32_ty], [IntrNoMem]>;
+
+  def int_riscv_bshfli : DefaultAttrsIntrinsic<[llvm_v8i32_ty], [llvm_v8i32_ty, llvm_i32_ty], [IntrNoMem]>;
+
+  def int_riscv_bslli : DefaultAttrsIntrinsic<[llvm_v8i32_ty], [llvm_v8i32_ty, llvm_i32_ty], [IntrNoMem]>;
+  def int_riscv_bsrli : DefaultAttrsIntrinsic<[llvm_v8i32_ty], [llvm_v8i32_ty, llvm_i32_ty], [IntrNoMem]>;
+
+  class ZKPCmpIntr : DefaultAttrsIntrinsic<[llvm_i32_ty], [llvm_v8i32_ty, llvm_v8i32_ty], [IntrNoMem]>;
+
+  def int_riscv_bsltu : ZKPCmpIntr;
+  def int_riscv_bseq  : ZKPCmpIntr;
+
+  def int_riscv_lbn : DefaultAttrsIntrinsic<[llvm_v8i32_ty], [llvm_ptr_ty, llvm_i32_ty], [IntrReadMem]>;
+
+  def int_riscv_sbn : DefaultAttrsIntrinsic<[], [llvm_v8i32_ty, llvm_ptr_ty, llvm_i32_ty], [IntrWriteMem]>;
+}
+
+//===----------------------------------------------------------------------===//
+
 include "llvm/IR/IntrinsicsRISCVXTHead.td"
 include "llvm/IR/IntrinsicsRISCVXsf.td"
 include "llvm/IR/IntrinsicsRISCVXCV.td"
