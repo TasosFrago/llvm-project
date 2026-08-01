@@ -341,6 +341,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
   if (Subtarget.hasVendorXZkp()) {
     addRegisterClass(MVT::v8i32, &RISCV::BRegsRegClass);
+    setOperationAction(ISD::BUILD_VECTOR, MVT::v8i32, Custom);
   }
 
   // Compute derived properties from the register classes.
@@ -5165,6 +5166,42 @@ static SDValue lowerBUILD_VECTOR(SDValue Op, SelectionDAG &DAG,
   return convertFromScalableVector(VT, Vec, DAG, Subtarget);
 }
 
+static SDValue lowerXZkpBuildVector(SDValue Op, SelectionDAG &DAG) {
+  SDLoc DL(Op);
+  EVT VT = Op.getValueType();
+
+  if (ISD::isBuildVectorOfConstantSDNodes(Op.getNode())) {
+    LLVMContext &Ctx = *DAG.getContext();
+    Type *EltTy = Type::getInt32Ty(Ctx);
+    SmallVector<Constant *, 8> ConstVals;
+    for (unsigned i = 0; i < Op.getNumOperands(); i++) {
+      auto *C = cast<ConstantSDNode>(Op.getOperand(i));
+      ConstVals.push_back(ConstantInt::get(EltTy, C->getZExtValue()));
+    }
+    Constant *CV = ConstantVector::get(ConstVals);
+    SDValue CPIdx = DAG.getConstantPool(
+        CV, DAG.getTargetLoweringInfo().getPointerTy(DAG.getDataLayout()),
+        Align(32));
+    return DAG.getLoad(VT, DL, DAG.getEntryNode(), CPIdx,
+                        MachinePointerInfo::getConstantPool(DAG.getMachineFunction()));
+  }
+
+  MachineFunction &MF = DAG.getMachineFunction();
+  int FI = MF.getFrameInfo().CreateStackObject(32, Align(32), false);
+  SDValue StackPtr = DAG.getFrameIndex(
+      FI, DAG.getTargetLoweringInfo().getPointerTy(DAG.getDataLayout()));
+
+  SmallVector<SDValue, 8> Stores;
+  for (unsigned i = 0; i < 8; ++i) {
+    SDValue Ptr = DAG.getMemBasePlusOffset(StackPtr, TypeSize::getFixed(i * 4), DL);
+    Stores.push_back(DAG.getStore(DAG.getEntryNode(), DL, Op.getOperand(i), Ptr,
+                                   MachinePointerInfo::getFixedStack(MF, FI, i * 4)));
+  }
+  SDValue Chain = DAG.getNode(ISD::TokenFactor, DL, MVT::Other, Stores);
+  return DAG.getLoad(VT, DL, Chain, StackPtr,
+                      MachinePointerInfo::getFixedStack(MF, FI));
+}
+
 static SDValue splatPartsI64WithVL(const SDLoc &DL, MVT VT, SDValue Passthru,
                                    SDValue Lo, SDValue Hi, SDValue VL,
                                    SelectionDAG &DAG) {
@@ -8789,6 +8826,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVECTOR_SPLICE(Op, DAG);
   case ISD::BUILD_VECTOR: {
     MVT VT = Op.getSimpleValueType();
+    if (Subtarget.hasVendorXZkp() && VT == MVT::v8i32)
+      return lowerXZkpBuildVector(Op, DAG);
     MVT EltVT = VT.getVectorElementType();
     if (!Subtarget.is64Bit() && EltVT == MVT::i64)
       return lowerBuildVectorViaVID(Op, DAG, Subtarget);

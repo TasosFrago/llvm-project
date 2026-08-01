@@ -38,6 +38,11 @@ static cl::opt<bool>
                          cl::desc("Disable two address hints for register "
                                   "allocation"));
 
+static cl::opt<unsigned> XZkpMaxBRegs(
+    "riscv-xzkp-max-bregs", cl::Hidden,
+    cl::desc("Limit the number of XZkp BRegs (b1-b31) available to the register allocator"),
+    cl::init(31));
+
 static_assert(RISCV::X1 == RISCV::X0 + 1, "Register list not consecutive");
 static_assert(RISCV::X31 == RISCV::X0 + 31, "Register list not consecutive");
 static_assert(RISCV::F1_H == RISCV::F0_H + 1, "Register list not consecutive");
@@ -187,6 +192,18 @@ BitVector RISCVRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
     if (isConstantPhysReg(Reg)) {
       for (MCPhysReg Sub : subregs_inclusive(Reg))
         markSuperRegs(Reserved, Sub);
+    }
+  }
+
+  if (Subtarget.hasVendorXZkp() && XZkpMaxBRegs < 31) {
+    static const MCPhysReg BRegsInOrder[] = {
+      RISCV::B1, RISCV::B2, RISCV::B3, RISCV::B4, RISCV::B5, RISCV::B6, RISCV::B7, RISCV::B8, RISCV::B9, RISCV::B10,
+      RISCV::B11, RISCV::B12, RISCV::B13, RISCV::B14, RISCV::B15, RISCV::B16, RISCV::B17, RISCV::B18, RISCV::B19, RISCV::B20,
+      RISCV::B21, RISCV::B22, RISCV::B23, RISCV::B24, RISCV::B25, RISCV::B26, RISCV::B27, RISCV::B28, RISCV::B29, RISCV::B30,
+      RISCV::B31,
+    };
+    for (unsigned i = XZkpMaxBRegs; i < std::size(BRegsInOrder); i++) {
+      markSuperRegs(Reserved, BRegsInOrder[i]);
     }
   }
 

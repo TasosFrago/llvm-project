@@ -44,6 +44,12 @@ ArrayRef<const char *> RISCVTargetInfo::getGCCRegNames() const {
       "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23",
       "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31",
 
+      // XZkp registers
+      "b0",  "b1",  "b2",  "b3",  "b4",  "b5",  "b6",  "b7",
+      "b8",  "b9",  "b10", "b11", "b12", "b13", "b14", "b15",
+      "b16", "b17", "b18", "b19", "b20", "b21", "b22", "b23",
+      "b24", "b25", "b26", "b27", "b28", "b29", "b30", "b31",
+
       // CSRs
       "fflags", "frm", "vtype", "vl", "vxsat", "vxrm", "sf.vcix_state"
     };

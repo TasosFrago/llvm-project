@@ -647,6 +647,13 @@ void RISCVInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
     return;
   }
 
+  // XZkp: BRegs->BRegs copies via mv.bn
+  if (RISCV::BRegsRegClass.contains(DstReg, SrcReg)) {
+    BuildMI(MBB, MBBI, DL, get(RISCV::BMV), DstReg)
+        .addReg(SrcReg, KillFlag | getRenamableRegState(RenamableSrc));
+    return;
+  }
+
   // VR->VR copies.
   const TargetRegisterClass *RegClass =
       TRI->getCommonMinimalPhysRegClass(SrcReg, DstReg);
@@ -719,6 +726,8 @@ void RISCVInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
     Opcode = RISCV::PseudoVSPILL7_M1;
   else if (RISCV::VRN8M1RegClass.hasSubClassEq(RC))
     Opcode = RISCV::PseudoVSPILL8_M1;
+  else if (RISCV::BRegsRegClass.hasSubClassEq(RC))
+    Opcode = RISCV::SBN;
   else
     llvm_unreachable("Can't store this register to stack slot");
 
@@ -811,6 +820,8 @@ void RISCVInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
     Opcode = RISCV::PseudoVRELOAD7_M1;
   else if (RISCV::VRN8M1RegClass.hasSubClassEq(RC))
     Opcode = RISCV::PseudoVRELOAD8_M1;
+  else if (RISCV::BRegsRegClass.hasSubClassEq(RC))
+    Opcode = RISCV::LBN;
   else
     llvm_unreachable("Can't load this register from stack slot");
 

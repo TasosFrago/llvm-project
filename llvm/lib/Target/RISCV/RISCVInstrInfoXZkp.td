@@ -114,10 +114,14 @@ let Predicates = [HasExtXZkp] in {
   def : Pat<(int_riscv_sbn BRegs:$rs2, GPR:$rs1, simm12:$imm12), (SBN BRegs:$rs2, GPR:$rs1, simm12:$imm12)>;
 
   // Automatic Load Patterns (Handles direct pointers and offset pointers)
-  def : Pat<(v8i32 (load GPR:$rs1)), (LBN GPR:$rs1, 0)>;
-  def : Pat<(v8i32 (load (add GPR:$rs1, simm12:$imm12))), (LBN GPR:$rs1, simm12:$imm12)>;
+  // def : Pat<(v8i32 (load GPR:$rs1)), (LBN GPR:$rs1, 0)>;
+  // def : Pat<(v8i32 (load (add GPR:$rs1, simm12:$imm12))), (LBN GPR:$rs1, simm12:$imm12)>;
+  def : Pat<(v8i32 (load (AddrRegImm (XLenVT GPR:$rs1), simm12:$imm12))),
+	    (LBN GPR:$rs1, simm12:$imm12)>;
 
   // Automatic Store Patterns (Handles direct pointers and offset pointers)
-  def : Pat<(store (v8i32 BRegs:$rs2), GPR:$rs1), (SBN BRegs:$rs2, GPR:$rs1, 0)>;
-  def : Pat<(store (v8i32 BRegs:$rs2), (add GPR:$rs1, simm12:$imm12)), (SBN BRegs:$rs2, GPR:$rs1, simm12:$imm12)>;
+  // def : Pat<(store (v8i32 BRegs:$rs2), GPR:$rs1), (SBN BRegs:$rs2, GPR:$rs1, 0)>;
+  // def : Pat<(store (v8i32 BRegs:$rs2), (add GPR:$rs1, simm12:$imm12)), (SBN BRegs:$rs2, GPR:$rs1, simm12:$imm12)>;
+  def : Pat<(store (v8i32 BRegs:$rs2), (AddrRegImm (XLenVT GPR:$rs1), simm12:$imm12)),
+	    (SBN BRegs:$rs2, GPR:$rs1, simm12:$imm12)>;
 }
