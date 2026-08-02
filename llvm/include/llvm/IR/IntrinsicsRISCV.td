@@ -2171,6 +2171,8 @@ let TargetPrefix = "riscv" in {
   def int_riscv_lbn : DefaultAttrsIntrinsic<[llvm_v8i32_ty], [llvm_ptr_ty, llvm_i32_ty], [IntrReadMem]>;
 
   def int_riscv_sbn : DefaultAttrsIntrinsic<[], [llvm_v8i32_ty, llvm_ptr_ty, llvm_i32_ty], [IntrWriteMem]>;
+
+  def int_riscv_sync_barrier : DefaultAttrsIntrinsic<[], [llvm_i32_ty], [IntrHasSideEffects]>;
 }
 
 //===----------------------------------------------------------------------===//

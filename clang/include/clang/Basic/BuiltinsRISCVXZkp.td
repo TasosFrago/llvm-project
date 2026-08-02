@@ -33,4 +33,6 @@ let Features = "xzkp", Attributes = [NoThrow] in {
   def lbn : RISCVXZkpBuiltin<"_Vector<8, unsigned int>(void *, int)">;
 
   def sbn : RISCVXZkpBuiltin<"void(_Vector<8, unsigned int>, void *, int)">;
+
+  def sync_barrier : RISCVXZkpBuiltin<"void(_Constant int)">;
 }

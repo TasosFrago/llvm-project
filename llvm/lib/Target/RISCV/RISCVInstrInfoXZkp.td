@@ -81,6 +81,14 @@ let Predicates = [HasExtXZkp] in {
     let mayStore = 1;
   }
 
+  def SYNCBAR : RVInstI<0x2, OPC_CUSTOM_1, (outs), (ins simm12:$imm12), "sync", "$imm12"> {
+    let rd = 0;
+    let rs1 = 0;
+    let hasSideEffects = 1;
+    let mayLoad = 1;
+    let mayStore = 1;
+  }
+
   // Intrinsic Patterns
 
   // Math & Logic
@@ -124,4 +132,6 @@ let Predicates = [HasExtXZkp] in {
   // def : Pat<(store (v8i32 BRegs:$rs2), (add GPR:$rs1, simm12:$imm12)), (SBN BRegs:$rs2, GPR:$rs1, simm12:$imm12)>;
   def : Pat<(store (v8i32 BRegs:$rs2), (AddrRegImm (XLenVT GPR:$rs1), simm12:$imm12)),
 	    (SBN BRegs:$rs2, GPR:$rs1, simm12:$imm12)>;
+
+  def : Pat<(int_riscv_sync_barrier simm12:$imm12), (SYNCBAR simm12:$imm12)>;
 }

@@ -1672,6 +1672,9 @@ Value *CodeGenFunction::EmitRISCVBuiltinExpr(unsigned BuiltinID,
   case RISCV::BI__builtin_riscv_zkp_sbn:
     ID = Intrinsic::riscv_sbn;
     break;
+  case RISCV::BI__builtin_riscv_zkp_sync_barrier:
+    ID = Intrinsic::riscv_sync_barrier;
+    break;
 
     // Vector builtins are handled from here.
 #include "clang/Basic/riscv_vector_builtin_cg.inc"
