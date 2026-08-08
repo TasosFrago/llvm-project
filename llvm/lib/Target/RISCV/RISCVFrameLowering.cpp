@@ -491,17 +491,6 @@ bool RISCVFrameLowering::hasFPImpl(const MachineFunction &MF) const {
       MFI.isFrameAddressTaken())
     return true;
 
-  // Xzkp: BRegs require 32-byte alignment, greater than the default stack
-  const RISCVSubtarget &Subtarget = MF.getSubtarget<RISCVSubtarget>();
-  if (Subtarget.hasVendorXZkp()) {
-    const MachineRegisterInfo &MRI = MF.getRegInfo();
-    for (unsigned i = 0, e = MRI.getNumVirtRegs(); i != e; ++i) {
-      Register VReg = Register::index2VirtReg(i);
-      if (MRI.getRegClassOrNull(VReg) == &RISCV::BRegsRegClass)
-        return true;
-    }
-  }
-
   // With large callframes around we may need to use FP to access the scavenging
   // emergency spillslot.
   //

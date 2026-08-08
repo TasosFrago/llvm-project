@@ -89,49 +89,99 @@ let Predicates = [HasExtXZkp] in {
     let mayStore = 1;
   }
 
+  class ZKPRType_BEXT<bits<2> funct2, bits<3> funct3, string opcodestr>
+      : RVInstR<0x0, funct3, OPC_CUSTOM_1, (outs GPR:$rd),
+                (ins BRegs:$rs1, GPR:$rs2, uimm5:$imm5), opcodestr, "$rd, $rs1, $rs2, $imm5"> {
+    bits<5> imm5;
+
+    let Inst{31-27} = imm5;
+    let Inst{26-25} = funct2;
+  }
+
+  def BEXT_W : ZKPRType_BEXT<0x0, 0x3, "bext.w">;
+
   // Intrinsic Patterns
 
+  multiclass ZKP_Pat_Math<Intrinsic intr, Instruction inst> {
+    def : Pat<(v8i32 (intr (v8i32 BRegs:$rs1), (v8i32 BRegs:$rs2))), (inst BRegs:$rs1, BRegs:$rs2)>;
+    def : Pat<(v4i32 (intr (v4i32 BRegs:$rs1), (v4i32 BRegs:$rs2))), (inst BRegs:$rs1, BRegs:$rs2)>;
+  }
+
   // Math & Logic
-  def : Pat<(int_riscv_bmadd   BRegs:$rs1, BRegs:$rs2), (BMODADD BRegs:$rs1, BRegs:$rs2)>;
-  def : Pat<(int_riscv_bmmul   BRegs:$rs1, BRegs:$rs2), (BMODMUL BRegs:$rs1, BRegs:$rs2)>;
-  def : Pat<(int_riscv_badd    BRegs:$rs1, BRegs:$rs2), (BADD    BRegs:$rs1, BRegs:$rs2)>;
-  def : Pat<(int_riscv_bmsub   BRegs:$rs1, BRegs:$rs2), (BMODSUB BRegs:$rs1, BRegs:$rs2)>;
-  def : Pat<(int_riscv_bsub    BRegs:$rs1, BRegs:$rs2), (BSUB    BRegs:$rs1, BRegs:$rs2)>;
-  def : Pat<(int_riscv_band    BRegs:$rs1, BRegs:$rs2), (BAND    BRegs:$rs1, BRegs:$rs2)>;
-  def : Pat<(int_riscv_bor     BRegs:$rs1, BRegs:$rs2), (BOR     BRegs:$rs1, BRegs:$rs2)>;
-  def : Pat<(int_riscv_bxor    BRegs:$rs1, BRegs:$rs2), (BXOR    BRegs:$rs1, BRegs:$rs2)>;
-  def : Pat<(int_riscv_bsll    BRegs:$rs1, BRegs:$rs2), (BSLL    BRegs:$rs1, BRegs:$rs2)>;
-  def : Pat<(int_riscv_bsrl    BRegs:$rs1, BRegs:$rs2), (BSRL    BRegs:$rs1, BRegs:$rs2)>;
+  defm : ZKP_Pat_Math<int_riscv_bmadd,   BMODADD >;
+  defm : ZKP_Pat_Math<int_riscv_bmmul,   BMODMUL >;
+  defm : ZKP_Pat_Math<int_riscv_badd,    BADD    >;
+  defm : ZKP_Pat_Math<int_riscv_bmsub,   BMODSUB >;
+  defm : ZKP_Pat_Math<int_riscv_bsub,    BSUB    >;
+  defm : ZKP_Pat_Math<int_riscv_band,    BAND    >;
+  defm : ZKP_Pat_Math<int_riscv_bor,     BOR     >;
+  defm : ZKP_Pat_Math<int_riscv_bxor,    BXOR    >;
+  defm : ZKP_Pat_Math<int_riscv_bsll,    BSLL    >;
+  defm : ZKP_Pat_Math<int_riscv_bsrl,    BSRL    >;
+
+  // Comparisons
+  multiclass ZKP_Pat_CMP<Intrinsic intr, Instruction inst> {
+    def : Pat<(intr (v8i32 BRegs:$rs1), (v8i32 BRegs:$rs2)), (inst BRegs:$rs1, BRegs:$rs2)>;
+    def : Pat<(intr (v4i32 BRegs:$rs1), (v4i32 BRegs:$rs2)), (inst BRegs:$rs1, BRegs:$rs2)>;
+  }
+  defm : ZKP_Pat_CMP<int_riscv_bsltu, BSLTU>;
+  defm : ZKP_Pat_CMP<int_riscv_bseq,  BSEQ>;
 
   // Move
-  def : Pat<(int_riscv_bmv BRegs:$rs1), (BMV BRegs:$rs1)>;
-
-  // Comparisons (Outputs to GPR)
-  def : Pat<(int_riscv_bsltu BRegs:$rs1, BRegs:$rs2), (BSLTU BRegs:$rs1, BRegs:$rs2)>;
-  def : Pat<(int_riscv_bseq  BRegs:$rs1, BRegs:$rs2), (BSEQ  BRegs:$rs1, BRegs:$rs2)>;
+  multiclass ZKP_Pat_MV<Intrinsic intr, Instruction inst> {
+    def : Pat<(v8i32 (intr (v8i32 BRegs:$rs1))), (inst BRegs:$rs1)>;
+    def : Pat<(v4i32 (intr (v4i32 BRegs:$rs1))), (inst BRegs:$rs1)>;
+  }
+  defm : ZKP_Pat_MV<int_riscv_bmv, BMV>;
 
   // Shuffles & Immediates
-  def : Pat<(int_riscv_bshfl  BRegs:$rs1, GPR:$rs2),        (BSHFL  BRegs:$rs1, GPR:$rs2)>;
-  def : Pat<(int_riscv_bshfli BRegs:$rs1, uimm5:$imm5),     (BSHFLI BRegs:$rs1, uimm5:$imm5)>;
-  
-  def : Pat<(int_riscv_bslli BRegs:$rs1, ZKPUImm8Leaf:$imm8),      (BSLLI BRegs:$rs1, uimm8:$imm8)>;
-  def : Pat<(int_riscv_bsrli BRegs:$rs1, ZKPUImm8Leaf:$imm8),      (BSRLI BRegs:$rs1, uimm8:$imm8)>;
+  multiclass ZKP_Pat_SHFL<Intrinsic intr, Instruction inst> {
+    def : Pat<(v8i32 (intr (v8i32 BRegs:$rs1), GPR:$rs2)), (inst BRegs:$rs1, GPR:$rs2)>;
+    def : Pat<(v4i32 (intr (v4i32 BRegs:$rs1), GPR:$rs2)), (inst BRegs:$rs1, GPR:$rs2)>;
+  }
+
+  multiclass ZKP_Pat_SHFLI<Intrinsic intr, Instruction inst, PatFrag imm_type> {
+    def : Pat<(v8i32 (intr (v8i32 BRegs:$rs1), imm_type:$imm)), (inst BRegs:$rs1, imm_type:$imm)>;
+    def : Pat<(v4i32 (intr (v4i32 BRegs:$rs1), imm_type:$imm)), (inst BRegs:$rs1, imm_type:$imm)>;
+  }
+
+  defm : ZKP_Pat_SHFL<int_riscv_bshfl, BSHFL>;
+  defm : ZKP_Pat_SHFLI<int_riscv_bshfli, BSHFLI, uimm5>;
+
+  defm : ZKP_Pat_SHFLI<int_riscv_bslli, BSLLI, ZKPUImm8Leaf>;
+  defm : ZKP_Pat_SHFLI<int_riscv_bsrli, BSRLI, ZKPUImm8Leaf>;
 
   // Memory Operations
-  def : Pat<(int_riscv_lbn GPR:$rs1, simm12:$imm12),             (LBN GPR:$rs1, simm12:$imm12)>;
-  def : Pat<(int_riscv_sbn BRegs:$rs2, GPR:$rs1, simm12:$imm12), (SBN BRegs:$rs2, GPR:$rs1, simm12:$imm12)>;
+  multiclass ZKP_Pat_Load<Intrinsic intr, Instruction inst> {
+    def : Pat<(v8i32 (intr GPR:$rs1, simm12:$imm12)), (inst GPR:$rs1, simm12:$imm12)>;
+    def : Pat<(v4i32 (intr GPR:$rs1, simm12:$imm12)), (inst GPR:$rs1, simm12:$imm12)>;
+  }
+
+  multiclass ZKP_Pat_Store<Intrinsic intr, Instruction inst> {
+    def : Pat<(intr (v8i32 BRegs:$rs2), GPR:$rs1, simm12:$imm12), (inst BRegs:$rs2, GPR:$rs1, simm12:$imm12)>;
+    def : Pat<(intr (v4i32 BRegs:$rs2), GPR:$rs1, simm12:$imm12), (inst BRegs:$rs2, GPR:$rs1, simm12:$imm12)>;
+  }
+
+  defm : ZKP_Pat_Load<int_riscv_lbn, LBN>;
+  defm : ZKP_Pat_Store<int_riscv_sbn, SBN>;
 
   // Automatic Load Patterns (Handles direct pointers and offset pointers)
-  // def : Pat<(v8i32 (load GPR:$rs1)), (LBN GPR:$rs1, 0)>;
-  // def : Pat<(v8i32 (load (add GPR:$rs1, simm12:$imm12))), (LBN GPR:$rs1, simm12:$imm12)>;
   def : Pat<(v8i32 (load (AddrRegImm (XLenVT GPR:$rs1), simm12:$imm12))),
 	    (LBN GPR:$rs1, simm12:$imm12)>;
 
-  // Automatic Store Patterns (Handles direct pointers and offset pointers)
-  // def : Pat<(store (v8i32 BRegs:$rs2), GPR:$rs1), (SBN BRegs:$rs2, GPR:$rs1, 0)>;
-  // def : Pat<(store (v8i32 BRegs:$rs2), (add GPR:$rs1, simm12:$imm12)), (SBN BRegs:$rs2, GPR:$rs1, simm12:$imm12)>;
   def : Pat<(store (v8i32 BRegs:$rs2), (AddrRegImm (XLenVT GPR:$rs1), simm12:$imm12)),
 	    (SBN BRegs:$rs2, GPR:$rs1, simm12:$imm12)>;
 
+  def : Pat<(v4i32 (load (AddrRegImm (XLenVT GPR:$rs1), simm12:$imm12))),
+	    (LBN GPR:$rs1, simm12:$imm12)>;
+
+  def : Pat<(store (v4i32 BRegs:$rs2), (AddrRegImm (XLenVT GPR:$rs1), simm12:$imm12)),
+	    (SBN BRegs:$rs2, GPR:$rs1, simm12:$imm12)>;
+
   def : Pat<(int_riscv_sync_barrier simm12:$imm12), (SYNCBAR simm12:$imm12)>;
+
+  def : Pat<(int_riscv_bext_w (v8i32 BRegs:$rs1), GPR:$rs2, uimm5:$imm5),
+  	    (BEXT_W BRegs:$rs1, GPR:$rs2, uimm5:$imm5)>;
+  def : Pat<(int_riscv_bext_w (v4i32 BRegs:$rs1), GPR:$rs2, uimm5:$imm5),
+  	    (BEXT_W BRegs:$rs1, GPR:$rs2, uimm5:$imm5)>;
 }

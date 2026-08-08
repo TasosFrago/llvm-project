@@ -1077,9 +1077,11 @@ def B29 : ZKPReg<29, "b29">;
 def B30 : ZKPReg<30, "b30">;
 def B31 : ZKPReg<31, "b31">;
 
-def BRegs : RegisterClass<"RISCV", [v8i32], 256, (add
+def BRegs : RegisterClass<"RISCV", [v8i32, v4i32], 32, (add
     B0, B1, B2, B3, B4, B5, B6, B7, B8, B9,
     B10, B11, B12, B13, B14, B15, B16, B17, B18, B19,
     B20, B21, B22, B23, B24, B25, B26, B27, B28, B29,
     B30, B31
 )>;
+
+def BRegs128 : RegisterClass<"RISCV", [v4i32], 16, (add BRegs)>;

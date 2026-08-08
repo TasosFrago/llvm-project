@@ -2140,8 +2140,8 @@ let TargetPrefix = "riscv" in {
 // XZkp BigNumber Intrinsics
 
 let TargetPrefix = "riscv" in {
-  class ZKPRTypeInstr : DefaultAttrsIntrinsic<[llvm_v8i32_ty],
-                                    [llvm_v8i32_ty, llvm_v8i32_ty], [IntrNoMem]>;
+  class ZKPRTypeInstr : DefaultAttrsIntrinsic<[llvm_anyvector_ty],
+                                    [LLVMMatchType<0>, LLVMMatchType<0>], [IntrNoMem]>;
 
   def int_riscv_bmadd : ZKPRTypeInstr;
   def int_riscv_bmmul : ZKPRTypeInstr;
@@ -2154,25 +2154,26 @@ let TargetPrefix = "riscv" in {
   def int_riscv_bsll  : ZKPRTypeInstr;
   def int_riscv_bsrl  : ZKPRTypeInstr;
 
-  def int_riscv_bmv   : DefaultAttrsIntrinsic<[llvm_v8i32_ty], [llvm_v8i32_ty], [IntrNoMem]>;
+  def int_riscv_bmv   : DefaultAttrsIntrinsic<[llvm_anyvector_ty], [LLVMMatchType<0>], [IntrNoMem]>;
 
-  def int_riscv_bshfl : DefaultAttrsIntrinsic<[llvm_v8i32_ty], [llvm_v8i32_ty, llvm_i32_ty], [IntrNoMem]>;
+  def int_riscv_bshfl  : DefaultAttrsIntrinsic<[llvm_anyvector_ty], [LLVMMatchType<0>, llvm_i32_ty], [IntrNoMem]>;
+  def int_riscv_bshfli : DefaultAttrsIntrinsic<[llvm_anyvector_ty], [LLVMMatchType<0>, llvm_i32_ty], [IntrNoMem]>;
 
-  def int_riscv_bshfli : DefaultAttrsIntrinsic<[llvm_v8i32_ty], [llvm_v8i32_ty, llvm_i32_ty], [IntrNoMem]>;
+  def int_riscv_bslli : DefaultAttrsIntrinsic<[llvm_anyvector_ty], [LLVMMatchType<0>, llvm_i32_ty], [IntrNoMem]>;
+  def int_riscv_bsrli : DefaultAttrsIntrinsic<[llvm_anyvector_ty], [LLVMMatchType<0>, llvm_i32_ty], [IntrNoMem]>;
 
-  def int_riscv_bslli : DefaultAttrsIntrinsic<[llvm_v8i32_ty], [llvm_v8i32_ty, llvm_i32_ty], [IntrNoMem]>;
-  def int_riscv_bsrli : DefaultAttrsIntrinsic<[llvm_v8i32_ty], [llvm_v8i32_ty, llvm_i32_ty], [IntrNoMem]>;
-
-  class ZKPCmpIntr : DefaultAttrsIntrinsic<[llvm_i32_ty], [llvm_v8i32_ty, llvm_v8i32_ty], [IntrNoMem]>;
+  class ZKPCmpIntr : DefaultAttrsIntrinsic<[llvm_i32_ty], [llvm_anyvector_ty, LLVMMatchType<0>], [IntrNoMem]>;
 
   def int_riscv_bsltu : ZKPCmpIntr;
   def int_riscv_bseq  : ZKPCmpIntr;
 
-  def int_riscv_lbn : DefaultAttrsIntrinsic<[llvm_v8i32_ty], [llvm_ptr_ty, llvm_i32_ty], [IntrReadMem]>;
+  def int_riscv_lbn : DefaultAttrsIntrinsic<[llvm_anyvector_ty], [llvm_ptr_ty, llvm_i32_ty], [IntrReadMem]>;
 
-  def int_riscv_sbn : DefaultAttrsIntrinsic<[], [llvm_v8i32_ty, llvm_ptr_ty, llvm_i32_ty], [IntrWriteMem]>;
+  def int_riscv_sbn : DefaultAttrsIntrinsic<[], [llvm_anyvector_ty, llvm_ptr_ty, llvm_i32_ty], [IntrWriteMem]>;
 
   def int_riscv_sync_barrier : DefaultAttrsIntrinsic<[], [llvm_i32_ty], [IntrHasSideEffects]>;
+
+  def int_riscv_bext_w : DefaultAttrsIntrinsic<[llvm_i32_ty], [llvm_anyvector_ty, llvm_i32_ty, llvm_i32_ty], [IntrNoMem]>;
 }
 
 //===----------------------------------------------------------------------===//

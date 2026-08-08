@@ -1615,63 +1615,107 @@ Value *CodeGenFunction::EmitRISCVBuiltinExpr(unsigned BuiltinID,
     return Builder.CreateFPTrunc(Ops[0], BFloatTy);
 
   // XZkp Extension
+  case RISCV::BI__builtin_riscv_zkp_bmadd128:
   case RISCV::BI__builtin_riscv_zkp_bmadd:
     ID = Intrinsic::riscv_bmadd;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bmmul128:
   case RISCV::BI__builtin_riscv_zkp_bmmul:
     ID = Intrinsic::riscv_bmmul;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_badd128:
   case RISCV::BI__builtin_riscv_zkp_badd:
     ID = Intrinsic::riscv_badd;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bmsub128:
   case RISCV::BI__builtin_riscv_zkp_bmsub:
     ID = Intrinsic::riscv_bmsub;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bsub128:
   case RISCV::BI__builtin_riscv_zkp_bsub:
     ID = Intrinsic::riscv_bsub;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_band128:
   case RISCV::BI__builtin_riscv_zkp_band:
     ID = Intrinsic::riscv_band;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bor128:
   case RISCV::BI__builtin_riscv_zkp_bor:
     ID = Intrinsic::riscv_bor;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bxor128:
   case RISCV::BI__builtin_riscv_zkp_bxor:
     ID = Intrinsic::riscv_bxor;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bsll128:
   case RISCV::BI__builtin_riscv_zkp_bsll:
     ID = Intrinsic::riscv_bsll;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bsrl128:
   case RISCV::BI__builtin_riscv_zkp_bsrl:
     ID = Intrinsic::riscv_bsrl;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bmv128:
   case RISCV::BI__builtin_riscv_zkp_bmv:
     ID = Intrinsic::riscv_bmv;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bsltu128:
   case RISCV::BI__builtin_riscv_zkp_bsltu:
     ID = Intrinsic::riscv_bsltu;
+    IntrinsicTypes = {Ops[0]->getType()};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bseq128:
   case RISCV::BI__builtin_riscv_zkp_bseq:
     ID = Intrinsic::riscv_bseq;
+    IntrinsicTypes = {Ops[0]->getType()};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bshfl128:
   case RISCV::BI__builtin_riscv_zkp_bshfl:
     ID = Intrinsic::riscv_bshfl;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bshfli128:
   case RISCV::BI__builtin_riscv_zkp_bshfli:
     ID = Intrinsic::riscv_bshfli;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bslli128:
   case RISCV::BI__builtin_riscv_zkp_bslli:
     ID = Intrinsic::riscv_bslli;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bsrli128:
   case RISCV::BI__builtin_riscv_zkp_bsrli:
     ID = Intrinsic::riscv_bsrli;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bext_w128:
+  case RISCV::BI__builtin_riscv_zkp_bext_w:
+    ID = Intrinsic::riscv_bext_w;
+    IntrinsicTypes = {Ops[0]->getType()};
+    break;
+  case RISCV::BI__builtin_riscv_zkp_lbn128:
   case RISCV::BI__builtin_riscv_zkp_lbn:
     ID = Intrinsic::riscv_lbn;
+    IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_sbn128:
   case RISCV::BI__builtin_riscv_zkp_sbn:
     ID = Intrinsic::riscv_sbn;
+    IntrinsicTypes = {Ops[0]->getType()};
     break;
+
   case RISCV::BI__builtin_riscv_zkp_sync_barrier:
     ID = Intrinsic::riscv_sync_barrier;
     break;

@@ -339,7 +339,11 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     }
   }
 
-  if (Subtarget.hasVendorXZkp()) {
+  if (Subtarget.hasVendorXZkp128b()) {
+    addRegisterClass(MVT::v4i32, &RISCV::BRegs128RegClass);
+    setOperationAction(ISD::BUILD_VECTOR, MVT::v4i32, Custom);
+  }
+  if (Subtarget.hasVendorXZkp256b()) {
     addRegisterClass(MVT::v8i32, &RISCV::BRegsRegClass);
     setOperationAction(ISD::BUILD_VECTOR, MVT::v8i32, Custom);
   }
@@ -5181,18 +5185,21 @@ static SDValue lowerXZkpBuildVector(SDValue Op, SelectionDAG &DAG) {
     Constant *CV = ConstantVector::get(ConstVals);
     SDValue CPIdx = DAG.getConstantPool(
         CV, DAG.getTargetLoweringInfo().getPointerTy(DAG.getDataLayout()),
-        Align(32));
+        Align(4));
     return DAG.getLoad(VT, DL, DAG.getEntryNode(), CPIdx,
                         MachinePointerInfo::getConstantPool(DAG.getMachineFunction()));
   }
 
   MachineFunction &MF = DAG.getMachineFunction();
-  int FI = MF.getFrameInfo().CreateStackObject(32, Align(32), false);
+  unsigned EltCount = VT.getVectorNumElements();
+  unsigned SizeBytes = EltCount * 4;
+  int FI = MF.getFrameInfo().CreateStackObject(SizeBytes, Align(4), false);
+
   SDValue StackPtr = DAG.getFrameIndex(
       FI, DAG.getTargetLoweringInfo().getPointerTy(DAG.getDataLayout()));
 
   SmallVector<SDValue, 8> Stores;
-  for (unsigned i = 0; i < 8; ++i) {
+  for (unsigned i = 0; i < EltCount; ++i) {
     SDValue Ptr = DAG.getMemBasePlusOffset(StackPtr, TypeSize::getFixed(i * 4), DL);
     Stores.push_back(DAG.getStore(DAG.getEntryNode(), DL, Op.getOperand(i), Ptr,
                                    MachinePointerInfo::getFixedStack(MF, FI, i * 4)));
@@ -8826,7 +8833,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVECTOR_SPLICE(Op, DAG);
   case ISD::BUILD_VECTOR: {
     MVT VT = Op.getSimpleValueType();
-    if (Subtarget.hasVendorXZkp() && VT == MVT::v8i32)
+    if ((Subtarget.hasVendorXZkp256b() && VT == MVT::v8i32) ||
+        (Subtarget.hasVendorXZkp128b() && VT == MVT::v4i32))
       return lowerXZkpBuildVector(Op, DAG);
     MVT EltVT = VT.getVectorElementType();
     if (!Subtarget.is64Bit() && EltVT == MVT::i64)

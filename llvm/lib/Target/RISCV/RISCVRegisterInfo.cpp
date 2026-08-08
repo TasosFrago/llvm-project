@@ -195,7 +195,7 @@ BitVector RISCVRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
     }
   }
 
-  if (Subtarget.hasVendorXZkp() && XZkpMaxBRegs < 31) {
+  if ((Subtarget.hasVendorXZkp128b() || Subtarget.hasVendorXZkp256b()) && XZkpMaxBRegs < 31) {
     static const MCPhysReg BRegsInOrder[] = {
       RISCV::B1, RISCV::B2, RISCV::B3, RISCV::B4, RISCV::B5, RISCV::B6, RISCV::B7, RISCV::B8, RISCV::B9, RISCV::B10,
       RISCV::B11, RISCV::B12, RISCV::B13, RISCV::B14, RISCV::B15, RISCV::B16, RISCV::B17, RISCV::B18, RISCV::B19, RISCV::B20,

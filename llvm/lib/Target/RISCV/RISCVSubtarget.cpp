@@ -118,6 +118,12 @@ RISCVSubtarget::initializeSubtargetDependencies(const Triple &TT, StringRef CPU,
 
   TargetABI = RISCVABI::computeTargetABI(*this, ABIName);
   RISCVFeatures::validate(TT, getFeatureBits());
+
+  // XZkp
+  if (hasVendorXZkp128b() && hasVendorXZkp256b())
+    reportFatalUsageError(
+        "'XZkp128' and 'XZkp256' extensions are mutually exclusive");
+
   return *this;
 }
 
