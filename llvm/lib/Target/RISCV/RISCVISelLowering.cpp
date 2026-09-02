@@ -342,10 +342,12 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
   if (Subtarget.hasVendorXZkp128b()) {
     addRegisterClass(MVT::v4i32, &RISCV::BRegs128RegClass);
     setOperationAction(ISD::BUILD_VECTOR, MVT::v4i32, Custom);
+    setOperationAction(ISD::INSERT_VECTOR_ELT, MVT::v4i32, Custom);
   }
   if (Subtarget.hasVendorXZkp256b()) {
     addRegisterClass(MVT::v8i32, &RISCV::BRegsRegClass);
     setOperationAction(ISD::BUILD_VECTOR, MVT::v8i32, Custom);
+    setOperationAction(ISD::INSERT_VECTOR_ELT, MVT::v8i32, Custom);
   }
 
   // Compute derived properties from the register classes.
@@ -5209,6 +5211,33 @@ static SDValue lowerXZkpBuildVector(SDValue Op, SelectionDAG &DAG) {
                       MachinePointerInfo::getFixedStack(MF, FI));
 }
 
+static SDValue lowerXZkpInsertVectorElt(SDValue Op, SelectionDAG &DAG) {
+  SDLoc DL(Op);
+  EVT VT = Op.getValueType();
+  SDValue Vec = Op.getOperand(0);
+  SDValue Elt = Op.getOperand(1);
+  SDValue Idx = Op.getOperand(2);
+
+  MachineFunction &MF = DAG.getMachineFunction();
+  unsigned EltCount = VT.getVectorNumElements();
+  unsigned SizeBytes = EltCount * 4;
+  int FI = MF.getFrameInfo().CreateStackObject(SizeBytes, Align(4), false);
+  SDValue StackPtr = DAG.getFrameIndex(
+      FI, DAG.getTargetLoweringInfo().getPointerTy(DAG.getDataLayout()));
+
+  SDValue Chain = DAG.getStore(DAG.getEntryNode(), DL, Vec, StackPtr,
+			       MachinePointerInfo::getFixedStack(MF, FI));
+
+  SDValue EltPtr = DAG.getNode(ISD::ADD, DL, StackPtr.getValueType(), StackPtr,
+                                DAG.getNode(ISD::SHL, DL, Idx.getValueType(), Idx,
+                                            DAG.getConstant(2, DL, Idx.getValueType())));
+  Chain = DAG.getStore(Chain, DL, Elt, EltPtr,
+                        MachinePointerInfo::getFixedStack(MF, FI));
+
+  return DAG.getLoad(VT, DL, Chain, StackPtr,
+                      MachinePointerInfo::getFixedStack(MF, FI));
+}
+
 static SDValue splatPartsI64WithVL(const SDLoc &DL, MVT VT, SDValue Passthru,
                                    SDValue Lo, SDValue Hi, SDValue VL,
                                    SelectionDAG &DAG) {
@@ -8356,8 +8385,13 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerToScalableOp(Op, DAG);
   case ISD::SPLAT_VECTOR_PARTS:
     return lowerSPLAT_VECTOR_PARTS(Op, DAG);
-  case ISD::INSERT_VECTOR_ELT:
+  case ISD::INSERT_VECTOR_ELT: {
+    MVT VT = Op.getSimpleValueType();
+    if ((Subtarget.hasVendorXZkp256b() && VT == MVT::v8i32) ||
+	(Subtarget.hasVendorXZkp128b() && VT == MVT::v4i32))
+      return lowerXZkpInsertVectorElt(Op, DAG);
     return lowerINSERT_VECTOR_ELT(Op, DAG);
+  }
   case ISD::EXTRACT_VECTOR_ELT:
     return lowerEXTRACT_VECTOR_ELT(Op, DAG);
   case ISD::SCALAR_TO_VECTOR: {

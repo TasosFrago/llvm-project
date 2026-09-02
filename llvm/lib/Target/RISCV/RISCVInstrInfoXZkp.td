@@ -23,13 +23,17 @@ let Predicates = [HasExtXZkp] in {
 
   class ZKPRType_SHFL<bits<7> funct7, bits<3> funct3, string opcodestr>
       : RVInstR<funct7, funct3, OPC_CUSTOM_0, (outs BRegs:$rd),
-                (ins BRegs:$rs1, GPR:$rs2), opcodestr, "$rd, $rs1, $rs2">;
+                (ins BRegs:$rs1, GPR:$rs2), opcodestr, "$rd, $rs1, $rs2"> {
+    let Constraints = "@earlyclobber $rd";
+  }
 
   def BSHFL : ZKPRType_SHFL<0x13, 0x0, "shfl.bn">;
 
   class ZKPRType_SHFLI<bits<7> funct7, bits<3> funct3, string opcodestr>
       : RVInstR<funct7, funct3, OPC_CUSTOM_0, (outs BRegs:$rd),
-                (ins BRegs:$rs1, uimm5:$rs2), opcodestr, "$rd, $rs1, $rs2">;
+                (ins BRegs:$rs1, uimm5:$rs2), opcodestr, "$rd, $rs1, $rs2"> {
+    let Constraints = "@earlyclobber $rd";
+  }
 
   def BSHFLI : ZKPRType_SHFLI<0x14, 0x0, "shfli.bn">;
 

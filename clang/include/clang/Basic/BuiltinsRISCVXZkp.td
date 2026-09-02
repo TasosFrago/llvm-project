@@ -28,7 +28,7 @@ let Features = "xzkp256b", Attributes = [NoThrow, Const] in {
   def bslli  : RISCVXZkpBuiltin<"_Vector<8, unsigned int>(_Vector<8, unsigned int>, _Constant int)">;
   def bsrli  : RISCVXZkpBuiltin<"_Vector<8, unsigned int>(_Vector<8, unsigned int>, _Constant int)">;
 
-  def bext_w : RISCVXZkpBuiltin<"unsigned int(_Vector<8, unsigned int>, unsigned int, unsigned int)">;
+  def bext_w : RISCVXZkpBuiltin<"unsigned int(_Vector<8, unsigned int>, unsigned int, _Constant unsigned int)">;
 }
 
 let Features = "xzkp256b", Attributes = [NoThrow] in {
@@ -60,7 +60,7 @@ let Features = "xzkp128b", Attributes = [NoThrow, Const] in {
   def bslli128  : RISCVXZkpBuiltin<"_Vector<4, unsigned int>(_Vector<4, unsigned int>, _Constant int)">;
   def bsrli128  : RISCVXZkpBuiltin<"_Vector<4, unsigned int>(_Vector<4, unsigned int>, _Constant int)">;
 
-  def bext_w128 : RISCVXZkpBuiltin<"unsigned int(_Vector<4, unsigned int>, unsigned int, unsigned int)">;
+  def bext_w128 : RISCVXZkpBuiltin<"unsigned int(_Vector<4, unsigned int>, unsigned int, _Constant unsigned int)">;
 }
 
 let Features = "xzkp128b", Attributes = [NoThrow] in {
