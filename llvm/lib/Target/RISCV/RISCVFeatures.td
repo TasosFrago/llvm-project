@@ -2196,12 +2196,14 @@ def TuneVentanaVeyron : SubtargetFeature<"ventana-veyron", "RISCVProcFamily", "V
                                          "Ventana Veyron-Series processors",
                                          [], InlineIgnore>;
 
-def FeatureVendorXZkp128b : RISCVExtension<1, 0, "Custom 128-bit ZKP Extension">;
-def FeatureVendorXZkp256b : RISCVExtension<1, 0, "Custom 256-bit ZKP Extension">;
+def FeatureVendorXZkp128b   : RISCVExtension<1, 0, "Custom 128-bit ZKP Extension">;
+def FeatureVendorXZkp256b   : RISCVExtension<1, 0, "Custom 256-bit ZKP Extension">;
+def FeatureVendorXZkp256bms : RISCVExtension<1, 0, "Custom 256-bit ZKP Extension (MUL Split)">;
 
-def HasExtXZkp128b : Predicate<"Subtarget->hasVendorXZkp128b()">;
-def HasExtXZkp256b : Predicate<"Subtarget->hasVendorXZkp256b()">;
+def HasExtXZkp128b   : Predicate<"Subtarget->hasVendorXZkp128b()">;
+def HasExtXZkp256b   : Predicate<"Subtarget->hasVendorXZkp256b()">;
+def HasExtXZkp256bms : Predicate<"Subtarget->hasVendorXZkp256bms()">;
 
-def HasExtXZkp : Predicate<"Subtarget->hasVendorXZkp128b() || Subtarget->hasVendorXZkp256b()">,
-                           AssemblerPredicate<(any_of FeatureVendorXZkp128b, FeatureVendorXZkp256b),
-                           "'XZkp128b' or 'XZkp256b' (Custom ZKP Extension)">;
+def HasExtXZkp : Predicate<"Subtarget->hasVendorXZkp128b() || Subtarget->hasVendorXZkp256b() || Subtarget->hasVendorXZkp256bms()">,
+                           AssemblerPredicate<(any_of FeatureVendorXZkp128b, FeatureVendorXZkp256b, FeatureVendorXZkp256bms),
+                           "'XZkp128b', 'XZkp256b' or 'XZkp256bms' (Custom ZKP Extension)">;

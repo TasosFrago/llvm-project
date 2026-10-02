@@ -1625,6 +1625,20 @@ Value *CodeGenFunction::EmitRISCVBuiltinExpr(unsigned BuiltinID,
     ID = Intrinsic::riscv_bmmul;
     IntrinsicTypes = {ConvertType(E->getType())};
     break;
+  case RISCV::BI__builtin_riscv_zkp_bmmul_0:
+  case RISCV::BI__builtin_riscv_zkp_bmmul_1:
+  case RISCV::BI__builtin_riscv_zkp_bmmul_2:
+  case RISCV::BI__builtin_riscv_zkp_bmmul_3: {
+    ID = Intrinsic::riscv_bmmul_ms;
+    IntrinsicTypes = {ConvertType(E->getType())};
+    unsigned Tile = 0;
+    if (BuiltinID == RISCV::BI__builtin_riscv_zkp_bmmul_1) Tile = 1;
+    else if (BuiltinID == RISCV::BI__builtin_riscv_zkp_bmmul_2) Tile = 2;
+    else if (BuiltinID == RISCV::BI__builtin_riscv_zkp_bmmul_3) Tile = 3;
+
+    Ops.push_back(llvm::ConstantInt::get(Builder.getInt32Ty(), Tile));
+    break;
+  }
   case RISCV::BI__builtin_riscv_zkp_badd128:
   case RISCV::BI__builtin_riscv_zkp_badd:
     ID = Intrinsic::riscv_badd;

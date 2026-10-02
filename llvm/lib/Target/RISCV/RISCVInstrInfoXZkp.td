@@ -1,5 +1,27 @@
 def ZKPUImm8Leaf : ImmLeaf<XLenVT, [{ return isUInt<8>(Imm); }]>;
 
+def ZKPUImm2Leaf : ImmLeaf<XLenVT, [{ return isUInt<2>(Imm); }]>;
+
+class ZKPRType_BMMUL_MS<string opcodestr>
+      : RVInstR<0x00, 0b000, OPC_CUSTOM_0, (outs BRegs:$rd),
+                (ins BRegs:$rs1, BRegs:$rs2, uimm2:$tile),
+                opcodestr, "$rd, $rs1, $rs2, $tile"> {
+    bits<2> tile;
+
+    let Inst{31-30} = 0b00;
+    let Inst{29-28} = tile;
+    let Inst{27-26} = 0b00;
+    let Inst{25}    = 1;
+}
+
+let Predicates = [HasExtXZkp256bms] in {
+  def BMODMUL_MS : ZKPRType_BMMUL_MS<"bmmul">;
+
+  def : Pat<(v8i32 (int_riscv_bmmul_ms (v8i32 BRegs:$rs1), (v8i32 BRegs:$rs2), ZKPUImm2Leaf:$tile)),
+            (BMODMUL_MS BRegs:$rs1, BRegs:$rs2, uimm2:$tile)>;
+}
+
+
 let Predicates = [HasExtXZkp] in {
 
   // Math - Differentiated by funct7

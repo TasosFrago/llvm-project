@@ -120,9 +120,13 @@ RISCVSubtarget::initializeSubtargetDependencies(const Triple &TT, StringRef CPU,
   RISCVFeatures::validate(TT, getFeatureBits());
 
   // XZkp
-  if (hasVendorXZkp128b() && hasVendorXZkp256b())
+  unsigned ZkpCount = 0;
+  if (hasVendorXZkp128b()) ZkpCount++;
+  if (hasVendorXZkp256b()) ZkpCount++;
+  if (hasVendorXZkp256bms()) ZkpCount++;
+  if (ZkpCount > 1)
     reportFatalUsageError(
-        "'XZkp128' and 'XZkp256' extensions are mutually exclusive");
+        "'XZkp128', 'XZkp256' and 'XZkp256ms' extensions are mutually exclusive");
 
   return *this;
 }

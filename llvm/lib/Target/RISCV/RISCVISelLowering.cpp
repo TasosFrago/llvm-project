@@ -344,7 +344,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::BUILD_VECTOR, MVT::v4i32, Custom);
     setOperationAction(ISD::INSERT_VECTOR_ELT, MVT::v4i32, Custom);
   }
-  if (Subtarget.hasVendorXZkp256b()) {
+  if (Subtarget.hasVendorXZkp256b() || Subtarget.hasVendorXZkp256bms()) {
     addRegisterClass(MVT::v8i32, &RISCV::BRegsRegClass);
     setOperationAction(ISD::BUILD_VECTOR, MVT::v8i32, Custom);
     setOperationAction(ISD::INSERT_VECTOR_ELT, MVT::v8i32, Custom);
@@ -8387,7 +8387,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerSPLAT_VECTOR_PARTS(Op, DAG);
   case ISD::INSERT_VECTOR_ELT: {
     MVT VT = Op.getSimpleValueType();
-    if ((Subtarget.hasVendorXZkp256b() && VT == MVT::v8i32) ||
+    if (((Subtarget.hasVendorXZkp256b() || Subtarget.hasVendorXZkp256bms()) && VT == MVT::v8i32) ||
 	(Subtarget.hasVendorXZkp128b() && VT == MVT::v4i32))
       return lowerXZkpInsertVectorElt(Op, DAG);
     return lowerINSERT_VECTOR_ELT(Op, DAG);
@@ -8867,7 +8867,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVECTOR_SPLICE(Op, DAG);
   case ISD::BUILD_VECTOR: {
     MVT VT = Op.getSimpleValueType();
-    if ((Subtarget.hasVendorXZkp256b() && VT == MVT::v8i32) ||
+    if (((Subtarget.hasVendorXZkp256b() || Subtarget.hasVendorXZkp256bms()) && VT == MVT::v8i32) ||
         (Subtarget.hasVendorXZkp128b() && VT == MVT::v4i32))
       return lowerXZkpBuildVector(Op, DAG);
     MVT EltVT = VT.getVectorElementType();

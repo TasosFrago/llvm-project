@@ -5,9 +5,8 @@ class RISCVXZkpBuiltin<string prototype, string features = ""> : TargetBuiltin {
 }
 
 
-let Features = "xzkp256b", Attributes = [NoThrow, Const] in {
+let Features = "xzkp256b|xzkp256bms", Attributes = [NoThrow, Const] in {
   def bmadd  : RISCVXZkpBuiltin<"_Vector<8, unsigned int>(_Vector<8, unsigned int>, _Vector<8, unsigned int>)">;
-  def bmmul  : RISCVXZkpBuiltin<"_Vector<8, unsigned int>(_Vector<8, unsigned int>, _Vector<8, unsigned int>)">;
   def badd   : RISCVXZkpBuiltin<"_Vector<8, unsigned int>(_Vector<8, unsigned int>, _Vector<8, unsigned int>)">;
   def bmsub  : RISCVXZkpBuiltin<"_Vector<8, unsigned int>(_Vector<8, unsigned int>, _Vector<8, unsigned int>)">;
   def bsub   : RISCVXZkpBuiltin<"_Vector<8, unsigned int>(_Vector<8, unsigned int>, _Vector<8, unsigned int>)">;
@@ -31,11 +30,23 @@ let Features = "xzkp256b", Attributes = [NoThrow, Const] in {
   def bext_w : RISCVXZkpBuiltin<"unsigned int(_Vector<8, unsigned int>, unsigned int, _Constant unsigned int)">;
 }
 
-let Features = "xzkp256b", Attributes = [NoThrow] in {
+let Features = "xzkp256b", Attributes = [NoThrow, Const] in {
+  def bmmul  : RISCVXZkpBuiltin<"_Vector<8, unsigned int>(_Vector<8, unsigned int>, _Vector<8, unsigned int>)">;
+}
+
+let Features = "xzkp256bms", Attributes = [NoThrow, Const] in {
+  def bmmul_0 : RISCVXZkpBuiltin<"_Vector<8, unsigned int>(_Vector<8, unsigned int>, _Vector<8, unsigned int>)">;
+  def bmmul_1 : RISCVXZkpBuiltin<"_Vector<8, unsigned int>(_Vector<8, unsigned int>, _Vector<8, unsigned int>)">;
+  def bmmul_2 : RISCVXZkpBuiltin<"_Vector<8, unsigned int>(_Vector<8, unsigned int>, _Vector<8, unsigned int>)">;
+  def bmmul_3 : RISCVXZkpBuiltin<"_Vector<8, unsigned int>(_Vector<8, unsigned int>, _Vector<8, unsigned int>)">;
+}
+
+let Features = "xzkp256b|xzkp256bms", Attributes = [NoThrow] in {
   def lbn : RISCVXZkpBuiltin<"_Vector<8, unsigned int>(void *, int)">;
 
   def sbn : RISCVXZkpBuiltin<"void(_Vector<8, unsigned int>, void *, int)">;
 }
+
 
 let Features = "xzkp128b", Attributes = [NoThrow, Const] in {
   def bmadd128  : RISCVXZkpBuiltin<"_Vector<4, unsigned int>(_Vector<4, unsigned int>, _Vector<4, unsigned int>)">;
@@ -69,6 +80,6 @@ let Features = "xzkp128b", Attributes = [NoThrow] in {
   def sbn128 : RISCVXZkpBuiltin<"void(_Vector<4, unsigned int>, void *, int)">;
 }
 
-let Features = "xzkp128b|xzkp256b", Attributes = [NoThrow] in {
+let Features = "xzkp128b|xzkp256b|xzkp256bms", Attributes = [NoThrow] in {
   def sync_barrier : RISCVXZkpBuiltin<"void(_Constant int)">;
 }

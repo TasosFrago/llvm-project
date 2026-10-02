@@ -2154,6 +2154,9 @@ let TargetPrefix = "riscv" in {
   def int_riscv_bsll  : ZKPRTypeInstr;
   def int_riscv_bsrl  : ZKPRTypeInstr;
 
+  def int_riscv_bmmul_ms : DefaultAttrsIntrinsic<[llvm_anyvector_ty],
+                                                 [LLVMMatchType<0>, LLVMMatchType<0>, llvm_i32_ty], [IntrHasSideEffects]>;
+
   def int_riscv_bmv   : DefaultAttrsIntrinsic<[llvm_anyvector_ty], [LLVMMatchType<0>], [IntrNoMem]>;
 
   def int_riscv_bshfl  : DefaultAttrsIntrinsic<[llvm_anyvector_ty], [LLVMMatchType<0>, llvm_i32_ty], [IntrNoMem]>;
