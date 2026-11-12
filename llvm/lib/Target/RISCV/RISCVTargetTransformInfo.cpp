@@ -2549,6 +2549,21 @@ InstructionCost RISCVTTIImpl::getVectorInstrCost(
     const Value *Op0, const Value *Op1, TTI::VectorInstrContext VIC) const {
   assert(Val->isVectorTy() && "This must be a vector type");
 
+  // Custom big-number registers use fixed vector IR types, independently of RVV.
+  if (auto *FVT = dyn_cast<FixedVectorType>(Val)) {
+    bool IsBigNumberType =
+        FVT->getElementType()->isIntegerTy(32) &&
+        ((FVT->getNumElements() == 4 &&
+          ST->hasVendorXZkp128b()) ||
+         (FVT->getNumElements() == 8 &&
+          (ST->hasVendorXZkp256b() ||
+           ST->hasVendorXZkp256bms())));
+
+    if (IsBigNumberType)
+      return BaseT::getVectorInstrCost(
+          Opcode, Val, CostKind, Index, Op0, Op1, VIC);
+  }
+
   // TODO: Add proper cost model for P extension fixed vectors (e.g., v4i16)
   // For now, skip all fixed vector cost analysis when P extension is available
   // to avoid crashes in getMinRVVVectorSizeInBits()

@@ -343,11 +343,13 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     addRegisterClass(MVT::v4i32, &RISCV::BRegs128RegClass);
     setOperationAction(ISD::BUILD_VECTOR, MVT::v4i32, Custom);
     setOperationAction(ISD::INSERT_VECTOR_ELT, MVT::v4i32, Custom);
+    setOperationAction(ISD::EXTRACT_VECTOR_ELT, MVT::v4i32, Custom);
   }
   if (Subtarget.hasVendorXZkp256b() || Subtarget.hasVendorXZkp256bms()) {
     addRegisterClass(MVT::v8i32, &RISCV::BRegsRegClass);
     setOperationAction(ISD::BUILD_VECTOR, MVT::v8i32, Custom);
     setOperationAction(ISD::INSERT_VECTOR_ELT, MVT::v8i32, Custom);
+    setOperationAction(ISD::EXTRACT_VECTOR_ELT, MVT::v8i32, Custom);
   }
 
   // Compute derived properties from the register classes.
@@ -11549,6 +11551,20 @@ SDValue RISCVTargetLowering::lowerEXTRACT_VECTOR_ELT(SDValue Op,
   EVT EltVT = Op.getValueType();
   MVT VecVT = Vec.getSimpleValueType();
   MVT XLenVT = Subtarget.getXLenVT();
+
+  // XZkp big-number registers use fixed vector types but do not require RVV.
+  // BEXT_W selects a window of (width + 1) bits at index * (width + 1),
+  // so width=31 extracts exactly one i32 lane for either a constant or a
+  // variable index. Reuse the intrinsic's existing instruction patterns.
+  if ((VecVT == MVT::v4i32 && Subtarget.hasVendorXZkp128b()) ||
+      (VecVT == MVT::v8i32 && (Subtarget.hasVendorXZkp256b() ||
+                             Subtarget.hasVendorXZkp256bms()))) {
+    SDValue ID = DAG.getConstant(Intrinsic::riscv_bext_w, DL, XLenVT);
+    SDValue WordIndex = DAG.getZExtOrTrunc(Idx, DL, MVT::i32);
+    SDValue Width = DAG.getConstant(31, DL, MVT::i32);
+    return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, MVT::i32, ID, Vec,
+                       WordIndex, Width);
+  }
 
   if (VecVT.getVectorElementType() == MVT::i1) {
     // Use vfirst.m to extract the first bit.
